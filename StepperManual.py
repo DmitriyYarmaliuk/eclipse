@@ -131,9 +131,9 @@ class StepperManual:
                     #		However, it also adds stability to the operation in that the device will be less prone to rotate back and forth repeatedly
                     #					step_val = 514
 		    step_val = current_val[0] - (required_pos - 514)
-                    print "Currenet_val:", current_val[0]
-                    print "requried_pos", required_pos
-		    print "Step value backwards:",step_val
+#                   print "Currenet_val:", current_val[0]
+#                   print "requried_pos", required_pos
+#		    print "Step value backwards:",step_val
                     self.backwards(StepperManual.delay, abs(step_val))
                     self.clear()
                     fp.close()
@@ -198,19 +198,19 @@ class StepperManual:
 
                 # Routine to determine which direction it must move
                 if required_pos < 0: # moves forward because it is to the left of the current position
-                    print "Inside Negative routine"
+#                   print "Inside Negative routine"
                     step_val = 514 - (abs(required_pos) + current_val[0])
-                    print "Currenet_val:", current_val[0]
-                    print "requried_pos", required_pos
-		    print "Step value backwards:",step_val
+#                   print "Currenet_val:", current_val[0]
+#                   print "requried_pos", required_pos
+#		    print "Step value backwards:",step_val
                     self.forward(StepperManual.delay, abs(step_val))
                     self.clear()
                     fp.close()
-                    print "about to write new current value"
+#                   print "about to write new current value"
                     new_curr_val = 514 - abs(required_pos)
-                    print "new_curr_value:",new_curr_val
+#                   print "new_curr_value:",new_curr_val
                     self.write_to_temp_file(new_curr_val)
-                    print "finished writing current value:",new_curr_val,"to temporary file"
+#                   print "finished writing current value:",new_curr_val,"to temporary file"
 #                   print "step_val", step_val
     
 

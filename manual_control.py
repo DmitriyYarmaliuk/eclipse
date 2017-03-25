@@ -1,6 +1,6 @@
 import curses
 from StepperManual import StepperManual
-
+from ServoManual import ServoManual
 # get the curses screen window
 screen = curses.initscr()
 
@@ -17,6 +17,7 @@ try:
     while True:
         char = screen.getch()
 	stepper = StepperManual(0,0)
+	servo = ServoManual(0)
         if char == ord('q'):
             break
         elif char == curses.KEY_RIGHT:
@@ -28,8 +29,10 @@ try:
 	    stepper.change_position_backward()
         elif char == curses.KEY_UP:
             screen.addstr(0, 0, 'up   ')
+	    servo.servo_control_up()
         elif char == curses.KEY_DOWN:
             screen.addstr(0, 0, 'down ')
+            servo.servo_control_down()
 finally:
     # shut down cleanly
      curses.nocbreak(); screen.keypad(0); curses.echo()
