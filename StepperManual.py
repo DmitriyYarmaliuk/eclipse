@@ -21,7 +21,7 @@ class StepperManual:
     # Initial value corresponding to 180 degree point
     initial_val = 257
 	
-    steps = 50
+    steps = 25
 
     # Setting up the pins
     coil_A_1_pin = 31
@@ -206,12 +206,13 @@ class StepperManual:
                     self.forward(StepperManual.delay, abs(step_val))
                     self.clear()
                     fp.close()
-                    v = 514 - abs(required_pos)
-                    print "new_curr_value:",v
-                    self.write_to_temp_file(v)
+                    print "about to write new current value"
+                    new_curr_val = 514 - abs(required_pos)
+                    print "new_curr_value:",new_curr_val
+                    self.write_to_temp_file(new_curr_val)
+                    print "finished writing current value:",new_curr_val,"to temporary file"
 #                   print "step_val", step_val
-                    self.write_to_temp_file(step_val)
-#                   print "step_val written to text file"
+    
 
                 else: # still at correct position
                     

@@ -25,6 +25,7 @@ try:
 	    stepper.change_position_forward()
         elif char == curses.KEY_LEFT:
             screen.addstr(0, 0, 'left ')
+	    stepper.change_position_backward()
         elif char == curses.KEY_UP:
             screen.addstr(0, 0, 'up   ')
         elif char == curses.KEY_DOWN:
