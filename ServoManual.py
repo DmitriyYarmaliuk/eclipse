@@ -1,5 +1,4 @@
 #!/usr/bin/python2
-
 import time
 import wiringpi
 import os 
