@@ -4,28 +4,38 @@ import time
 import wiringpi
 import os 
 
+# Defining class for manual servo control
 class ServoManual:
+	
+	# Defining class constructor 
+	def __init__(self):
+		pass        
 
-	def __init__(self,y_raw):
-        	self.y_raw = y_raw
-        
-
-        # use 'GPIO naming'
+        # Use 'GPIO naming'
 	wiringpi.wiringPiSetupGpio()
 
-	# set #18 to be a PWM output
+	# Set #18 to be a PWM output
 	wiringpi.pinMode(18, wiringpi.GPIO.PWM_OUTPUT)
 
-	# set the PWM mode to milliseconds stype
+	# Set the PWM mode to milliseconds stype
 	wiringpi.pwmSetMode(wiringpi.GPIO.PWM_MODE_MS)
 
-	# divide down clock
+	# Divide down clock
 	wiringpi.pwmSetClock(192)
 	wiringpi.pwmSetRange(2000)
 
+	# Defining delay period (given in milliseconds)
 	delay_period = 0.01
 
+	# Defining angle by which the servo motor will move up or down  
+	# when the corresponding arrow key is pressed by the user
 	angle = 10
+
+	# Defininf defualt servo angle
+	default = 0
+
+	# Defining angle limit for the servo (determined by the case printed for the camera)
+	angle_limit = 90
 
 	# Side-note 210 is 2.1 ms
 	# pulse = 213 (90 degrees to the right from the reference)
@@ -34,12 +44,11 @@ class ServoManual:
 
 	# one degree of movement corresponds to 0.888 ms
 
-
-
-	# Function that writes a list to a text file.
-        # This function is used as a means of providing memory to keep track of the position of the stepper.
+	# Defining a function that writes a list to a text file.
+        # This function is used as a means of providing memory to keep track of the position 
+	# associated with the servo motor.
         def write_to_temp_file_servo(self,value):
-                # Opening/creating temporary text file if it does not exist
+       	        # Opening/creating temporary text file if it does not exist
                 try:
                         with open("mem2.txt", 'w') as f:
                                 f.write('%d' %int(value))
@@ -53,41 +62,12 @@ class ServoManual:
                         f.close()
 
 
-
-	def write_to_temp(value,value2):
-
-        	# Opening/creating temporary text file if it does not exist
-        	try:
-                	with open("mem2.txt", 'w') as f:
-                        	f.write('%d' %int(value))
-                        	f.write(" ")
-                        	f.write('%d'%int(value2))
-        	except IOError:
-                	# Letting the user know that an IO error has occured
-                	print 'Cannot open storage file for writing'
-        	else:
-
-                	# Closing the opened file
-                	f.close()
-	
-	def read_temp():
-
-
-        	write_to_temp(23,45)
-        	with open("mem2.txt", 'r') as fp:
-                	current_val = [int(n) for n in fp.read().split()]
-        	print "current_val[0]", current_val[0]
-        	print "current_val[1]", current_val[1]
-
-
-
+	# Defining a function used to move the servo motor up 
 	def servo_control_up(self):
 
                 # Checking if text file used for memory by the program exists
                 if os.path.isfile('mem2.txt'):
 
-			print "Inside if (mem2.txt) already exists"
-
                         try:
                                  # Opening storage file for reading
                                 fp = open("mem2.txt",'r')
@@ -98,32 +78,37 @@ class ServoManual:
 
 
 			else:
-
+				
+				# Obtaining current position of the servo motor
                                 current_val = [int(n) for n in fp.read().split()]
 
-#				angle = int((self.y_raw - 150) * 41.4/300)
-
-                                # Pulse width given in millisecond
-
+				# Defining the new required angle to which the servo motor
+				# has to move after a key press
 				required_angle = ServoManual.angle + current_val[0]
 
-				if required_angle > 90:
-					required_angle = 90
-				      	
+				# Preventing the servo motor from moving more than 90 degree from rest
+				# since the motor can only span 180 degrees of motion
+				if required_angle > ServoManual.angle_limit:
+					required_angle = ServoManual.angle_limit
+				
+				# Calculating the required pulse width corresponding to the desired 
+				# servo motor angle/position       	
 			        pulse_width = 133 + int(0.888*required_angle)
-
                                 time.sleep(0.1)
+				
+				# Driving the servo motor
 				wiringpi.pwmWrite(18,pulse_width)
                                 time.sleep(ServoManual.delay_period)
-				print "Angle:",ServoManual.angle
-				print "Requried angle:",required_angle
+
+				# Closing file that was opened for reading
                                 fp.close()
+				
+				# Writing new servo position to temporary storage file
                                 self.write_to_temp_file_servo(required_angle)
                 else:
 
-                        # Creating a text file with the initial/default position of the stepper motor
-			print "Inside else"
-			self.write_to_temp_file_servo(0)
+                        # Creating a text file with the initial/default position of the servo motor
+			self.write_to_temp_file_servo(ServoManual.default)
                         try:
                                  # Opening storage file for reading
                                 fp = open("mem2.txt",'r')
@@ -132,24 +117,25 @@ class ServoManual:
                                 print 'Cannot open storage file for reading'
 
                         else:
-			
+				# Calculating the required pulse width corresponding to the desired 
+                                # servo motor angle/position 
 				pulse_width = 133 + int(0.888*ServoManual.angle)
 
              			time.sleep(0.1)
+
+				# Driving the servo motor
 		   		wiringpi.pwmWrite(18,pulse_width)
                 		time.sleep(ServoManual.delay_period)
-
 
                                 # Closing file that was opened for reading
                                 fp.close()
                                 self.write_to_temp_file_servo(ServoManual.angle)
 
+	# Defining a function used to move the servo motor down 
 	def servo_control_down(self):
 
                 # Checking if text file used for memory by the program exists
                 if os.path.isfile('mem2.txt'):
-
-			print "Inside if (mem2.txt) already exists"
 
                         try:
                                  # Opening storage file for reading
@@ -162,31 +148,37 @@ class ServoManual:
 
 			else:
 
+				# Obtaining current position of the servo motor
                                 current_val = [int(n) for n in fp.read().split()]
 
-#				angle = int((self.y_raw - 150) * 41.4/300)
-
-                                # Pulse width given in millisecond
-
+				# Defining the new required angle to which the servo motor
+				# has to move after a key press
 				required_angle = current_val[0] - ServoManual.angle 
-
-				if required_angle < -90:
-					required_angle = -90
+				
+				# Preventing the servo motor from moving more than 90 degree from rest
+				# since the motor can only span 180 degrees of motion	
+				if required_angle < -ServoManual.angle_limit:
+					required_angle = -ServoManual.angle_limit
 				      	
+				# Calculating the required pulse width corresponding to the desired 
+				# servo motor angle/position  
 			        pulse_width = 133 + int(0.888*required_angle)
 
                                 time.sleep(0.1)
+					
+				# Driving the servo motor
 				wiringpi.pwmWrite(18,pulse_width)
                                 time.sleep(ServoManual.delay_period)
-				print "Angle:",ServoManual.angle
-				print "Requried angle:",required_angle
+				
+				# Closing file that was opened for reading
                                 fp.close()
+
+				# Writing new servo position to temporary storage file
                                 self.write_to_temp_file_servo(required_angle)
                 else:
 
-                        # Creating a text file with the initial/default position of the stepper motor
-			print "Inside else"
-			self.write_to_temp_file_servo(0)
+                        # Creating a text file with the initial/default position of the servo motor
+			self.write_to_temp_file_servo(ServoManual.default)
                         try:
                                  # Opening storage file for reading
                                 fp = open("mem2.txt",'r')
@@ -196,37 +188,21 @@ class ServoManual:
 
                         else:
 			
+				# Calculating the required pulse width corresponding to the desired 
+                                # servo motor angle/position 
 				pulse_width = 133 + int(0.888*-ServoManual.angle)
 
              			time.sleep(0.1)
+				
+				# Driving the servo motor
 		   		wiringpi.pwmWrite(18,pulse_width)
                 		time.sleep(ServoManual.delay_period)
 
-
                                 # Closing file that was opened for reading
                                 fp.close()
+				
+				# Writing new servo position to the temporary storage file
                                 self.write_to_temp_file_servo(-ServoManual.angle)
-
-
-	def move_servo(self):
-
-		print "Y_Poisition", self.y_raw
-		
-                if self.y_raw >= 150:
-			angle = int((self.y_raw - 150) * 41.4/300)
-                	# Pulse width given in millisecond
-			print "Inside 1st if angle = ",angle
-                	pulse_width = 133 + int(0.888*angle)
-                        wiringpi.pwmWrite(18,pulse_width)
-                        time.sleep(Servo.delay_period)
-                elif self.y_raw <= 150:
-                        angle = int((self.y_raw - 150) * 41.4/300)
-                	# Pulse width given in milliseconds
-			print "Inside 2nd if angle = ",angle
-                	pulse_width = 133 + int(0.888*angle)
-			wiringpi.pwmWrite(18,pulse_width)
-                        time.sleep(Servo.delay_period)
-
 
 
 
