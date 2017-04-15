@@ -5,12 +5,11 @@ import time
 import sys
 import os
 
-
 # This class is used to run the stepper motor
 # Utilizes the GPIO ports on the Raspberry Pi
 # Extra hardware includes a motor driver
 # Basic setup and usage of stepper motor
-# Do not motify any hardcoded values for controlling the stepper motor
+# Do not modify any hardcoded values for controlling the stepper motor
 class Stepper:
     def __init__(self, x_raw, y_raw):
         self.x_raw = x_raw
@@ -109,10 +108,11 @@ class Stepper:
             f.close()
 
     def change_position(self):
+
         # Horizontal field of view for pi camera: 53.50 +/- 0.13 degrees
         # Converting pixel value which is the distance from the center pixel (200)
-        # Total number of pixels = 400 x 400
-        # Center = 200, 200
+        # Total number of pixels = 400 x 300
+        # Center = 200
 
         # finds current degree value in reference to the frame to change to center
         degree_val = (self.x_raw - 200) * 53.5 / 400  # CHANGE FOR NUMBER OF DEGREES
@@ -206,7 +206,7 @@ class Stepper:
 
     def change_position_scan(self):  # scanning algorithm for changing the position
 
-        steps = int(73) # number of steps to scan based on the field of view
+        steps = int(74) # number of steps to scan based on the field of view
 
         # Negative -- left -- backwards
         if steps < 0:
